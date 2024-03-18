@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import NavBar from "./components/NavBar";
 import Main from "./components/Main";
+import Loader from "./components/Loader";
 
 const tempMovieData = [
   {
@@ -51,15 +52,18 @@ const tempWatchedData = [
 export default function App() {
   const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState([]);
+  const [isLoading, setIsLoading] = useState([]);
 
   useEffect(function () {
     async function fetchMovies() {
+      setIsLoading(true);
       const res = await fetch(
         `https://api.themoviedb.org/3/movie/now_playing?api_key=2c03a557e1479b7b37ea2b20a7672f3e&language=en-US&page=1`
       );
       const data = await res.json();
-      console.log(data)
+      console.log(data);
       setMovies(data.results);
+      setIsLoading(false);
     }
     fetchMovies();
   }, []);
@@ -67,7 +71,7 @@ export default function App() {
   return (
     <>
       <NavBar movies={movies} />
-      <Main movies={movies} watched={watched} />
+      {isLoading ? <Loader /> : <Main movies={movies} watched={watched} />}
     </>
   );
 }
