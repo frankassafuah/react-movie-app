@@ -1,18 +1,30 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import StarRating from "./StarRating";
+import Loader from "./Loader";
 
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
-export default function Main({ movies, watched }) {
+export default function Main({
+  movies,
+  watched,
+  handleSelectMovie,
+  selectedId,
+  handleCloseMovie,
+}) {
   return (
     <main className="main">
-      <ListBox movies={movies} />
-      <WatchedBox watched={watched} />
+      <ListBox movies={movies} handleSelectMovie={handleSelectMovie} />
+      <WatchedBox
+        watched={watched}
+        selectedId={selectedId}
+        handleCloseMovie={handleCloseMovie}
+      />
     </main>
   );
 }
 
-function ListBox({ movies }) {
+function ListBox({ movies, handleSelectMovie }) {
   const [isOpen1, setIsOpen1] = useState(true);
 
   return (
@@ -23,24 +35,30 @@ function ListBox({ movies }) {
       >
         {isOpen1 ? "–" : "+"}
       </button>
-      {isOpen1 && <MovieList movies={movies} />}
+      {isOpen1 && (
+        <MovieList movies={movies} handleSelectMovie={handleSelectMovie} />
+      )}
     </div>
   );
 }
 
-function MovieList({ movies }) {
+function MovieList({ movies, handleSelectMovie }) {
   return (
-    <ul className="list">
+    <ul className="list list-movies">
       {movies?.map((movie) => (
-        <Movie movie={movie} key={movie.id} />
+        <Movie
+          movie={movie}
+          key={movie.id}
+          handleSelectMovie={handleSelectMovie}
+        />
       ))}
     </ul>
   );
 }
 
-function Movie({ movie }) {
+function Movie({ movie, handleSelectMovie }) {
   return (
-    <li>
+    <li onClick={() => handleSelectMovie(movie.id)}>
       <img
         src={`https://image.tmdb.org/t/p/w500/${movie.poster_path}`}
         alt={`${movie.title} poster`}
@@ -56,7 +74,7 @@ function Movie({ movie }) {
   );
 }
 
-function WatchedBox({ watched }) {
+function WatchedBox({ watched, selectedId, handleCloseMovie }) {
   const [isOpen2, setIsOpen2] = useState(true);
 
   return (
@@ -67,10 +85,78 @@ function WatchedBox({ watched }) {
       >
         {isOpen2 ? "–" : "+"}
       </button>
-      {isOpen2 && (
+      {selectedId ? (
+        <MovieDetails selectedId={selectedId} onCloseMovie={handleCloseMovie} />
+      ) : (
         <>
           <WatchedSummary watched={watched} />
           <WatchedMovieList watched={watched} />
+        </>
+      )}
+    </div>
+  );
+}
+
+function MovieDetails({ selectedId, onCloseMovie }) {
+  const [movie, setMovie] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(
+    function () {
+      async function getMovieDetails() {
+        setIsLoading(true);
+        const res = await fetch(
+          `https://api.themoviedb.org/3/movie/${selectedId}?api_key=37ed43a4f8eaa2abd75f9283692947bc&language=en-US`
+        );
+        const data = await res.json();
+        setMovie(data);
+        setIsLoading(false);
+      }
+      getMovieDetails();
+    },
+    [selectedId]
+  );
+
+  return (
+    <div className="details">
+      {isLoading ? (
+        <Loader />
+      ) : (
+        <>
+          <header>
+            <button className="btn-back" onClick={onCloseMovie}>
+              &larr;
+            </button>
+            <img
+              src={`https://image.tmdb.org/t/p/w500/${movie.poster_path}`}
+              alt={`Poster of ${movie.title} movie`}
+            />
+            <div className="details-overview">
+              <h2>{movie.title}</h2>
+              <p>
+                {movie.release_date} &bull; {movie.runtime}
+              </p>
+              <div style={{ display: "flex", flexWrap: "wrap" }}>
+                {movie.genres?.map((g, i) => (
+                  <p key={i}>{g.name},</p>
+                ))}
+              </div>
+              <p>
+                <span>⭐️</span>
+                {Math.round(movie.vote_average)} rating
+              </p>
+            </div>
+          </header>
+          <section>
+            <div className="rating">
+              <StarRating maxRating={10} size={24} />
+            </div>
+            <p>
+              <em>{movie.overview}</em>
+            </p>
+            <p>Starring</p>
+            <p>Directed by </p>
+          </section>
         </>
       )}
     </div>

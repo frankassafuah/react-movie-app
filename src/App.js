@@ -52,8 +52,9 @@ const tempWatchedData = [
 export default function App() {
   const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState([]);
-  const [isLoading, setIsLoading] = useState([]);
-  const [query, setQuery] = useState([""]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [query, setQuery] = useState("");
+  const [selectedId, setSelectedId] = useState(null);
 
   useEffect(function () {
     async function fetchMovies() {
@@ -87,10 +88,26 @@ export default function App() {
     [query]
   );
 
+  function handleCloseMovie() {
+    setSelectedId(null);
+  }
+
   return (
     <>
       <NavBar movies={movies} fetchMovie={(query) => setQuery(query)} />
-      {isLoading ? <Loader /> : <Main movies={movies} watched={watched} />}
+      {isLoading ? (
+        <Loader />
+      ) : (
+        <Main
+          movies={movies}
+          watched={watched}
+          selectedId={selectedId}
+          handleCloseMovie={handleCloseMovie}
+          handleSelectMovie={(id) =>
+            setSelectedId((selectedId) => (id === selectedId ? null : id))
+          }
+        />
+      )}
     </>
   );
 }
