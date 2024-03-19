@@ -1,11 +1,20 @@
 import { useState } from "react";
-export default function NavBar({ movies }) {
+export default function NavBar({ movies, fetchMovie }) {
   const [query, setQuery] = useState("");
 
+  function handleOnChange(value) {
+    console.log(value)
+    setQuery(value);
+    fetchMovie(value);
+  }
   return (
     <nav className="nav-bar">
       <Logo />
-      <Search query={query} setQuery={setQuery} />
+      <Search
+        query={query}
+        setQuery={setQuery}
+        handleOnChange={handleOnChange}
+      />
       <Numresults movies={movies} />
     </nav>
   );
@@ -20,14 +29,14 @@ function Logo() {
   );
 }
 
-function Search({ query, setQuery }) {
+function Search({ query, setQuery, handleOnChange }) {
   return (
     <input
       className="search"
       type="text"
       placeholder="Search movies..."
       value={query}
-      onChange={(e) => setQuery(e.target.value)}
+      onChange={(e) => handleOnChange(e.target.value)}
     />
   );
 }

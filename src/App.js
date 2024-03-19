@@ -53,6 +53,7 @@ export default function App() {
   const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState([]);
   const [isLoading, setIsLoading] = useState([]);
+  const [query, setQuery] = useState([""]);
 
   useEffect(function () {
     async function fetchMovies() {
@@ -68,9 +69,27 @@ export default function App() {
     fetchMovies();
   }, []);
 
+  useEffect(
+    function () {
+      async function fetchMovie() {
+        setIsLoading(true);
+        const res = await fetch(
+          `https://api.themoviedb.org/3/search/movie?api_key=37ed43a4f8eaa2abd75f9283692947bc&language=en-US&page=1&query=${query}`
+        );
+        const data = await res.json();
+        console.log(data);
+        setMovies(data.results);
+        setIsLoading(false);
+      }
+      if (query.length < 3) return;
+      fetchMovie();
+    },
+    [query]
+  );
+
   return (
     <>
-      <NavBar movies={movies} />
+      <NavBar movies={movies} fetchMovie={(query) => setQuery(query)} />
       {isLoading ? <Loader /> : <Main movies={movies} watched={watched} />}
     </>
   );
