@@ -11,6 +11,7 @@ export default function Main({
   handleSelectMovie,
   selectedId,
   handleCloseMovie,
+  handleAddWatched,
 }) {
   return (
     <main className="main">
@@ -19,6 +20,7 @@ export default function Main({
         watched={watched}
         selectedId={selectedId}
         handleCloseMovie={handleCloseMovie}
+        handleAddWatched={handleAddWatched}
       />
     </main>
   );
@@ -74,7 +76,12 @@ function Movie({ movie, handleSelectMovie }) {
   );
 }
 
-function WatchedBox({ watched, selectedId, handleCloseMovie }) {
+function WatchedBox({
+  watched,
+  selectedId,
+  handleCloseMovie,
+  handleAddWatched,
+}) {
   const [isOpen2, setIsOpen2] = useState(true);
 
   return (
@@ -86,7 +93,11 @@ function WatchedBox({ watched, selectedId, handleCloseMovie }) {
         {isOpen2 ? "–" : "+"}
       </button>
       {selectedId ? (
-        <MovieDetails selectedId={selectedId} onCloseMovie={handleCloseMovie} />
+        <MovieDetails
+          selectedId={selectedId}
+          onCloseMovie={handleCloseMovie}
+          onAddWatched={handleAddWatched}
+        />
       ) : (
         <>
           <WatchedSummary watched={watched} />
@@ -97,9 +108,24 @@ function WatchedBox({ watched, selectedId, handleCloseMovie }) {
   );
 }
 
-function MovieDetails({ selectedId, onCloseMovie }) {
+function MovieDetails({ selectedId, onCloseMovie, onAddWatched }) {
   const [movie, setMovie] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [userRating, setUserRating] = useState("");
+
+  function handleAdd() {
+    const newWatchedMovie = {
+      id: selectedId,
+      title: movie.title,
+      year: movie.release_date,
+      poster_path: movie.poster_path,
+      vote_average: Number(movie.vote_average),
+      runtime: movie.runtime,
+      userRating,
+    };
+    onAddWatched(newWatchedMovie);
+    onCloseMovie();
+  }
 
   useEffect(
     function () {
@@ -134,7 +160,7 @@ function MovieDetails({ selectedId, onCloseMovie }) {
             <div className="details-overview">
               <h2>{movie.title}</h2>
               <p>
-                {movie.release_date} &bull; {movie.runtime}
+                {movie.release_date} &bull; {movie.runtime} min
               </p>
               <div style={{ display: "flex", flexWrap: "wrap" }}>
                 {movie.genres?.map((g, i) => (
@@ -149,7 +175,17 @@ function MovieDetails({ selectedId, onCloseMovie }) {
           </header>
           <section>
             <div className="rating">
-              <StarRating maxRating={10} size={24} />
+              <StarRating
+                maxRating={10}
+                size={24}
+                onSetRating={setUserRating}
+              />
+
+              {userRating > 0 && (
+                <button className="btn-add" onClick={handleAdd}>
+                  + Add to list
+                </button>
+              )}
             </div>
             <p>
               <em>{movie.overview}</em>
@@ -164,7 +200,7 @@ function MovieDetails({ selectedId, onCloseMovie }) {
 }
 
 function WatchedSummary({ watched }) {
-  const avgImdbRating = average(watched.map((movie) => movie.imdbRating));
+  const avgImdbRating = average(watched.map((movie) => movie.vote_average));
   const avgUserRating = average(watched.map((movie) => movie.userRating));
   const avgRuntime = average(watched.map((movie) => movie.runtime));
 
@@ -214,7 +250,7 @@ function WatchedMovie({ movie }) {
       <div>
         <p>
           <span>⭐️</span>
-          <span>{movie.imdbRating}</span>
+          <span>{movie.vote_average}</span>
         </p>
         <p>
           <span>🌟</span>
