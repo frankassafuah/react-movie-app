@@ -12,6 +12,7 @@ export default function Main({
   selectedId,
   handleCloseMovie,
   handleAddWatched,
+  handleDeleteWatched,
 }) {
   return (
     <main className="main">
@@ -21,6 +22,7 @@ export default function Main({
         selectedId={selectedId}
         handleCloseMovie={handleCloseMovie}
         handleAddWatched={handleAddWatched}
+        handleDeleteWatched={handleDeleteWatched}
       />
     </main>
   );
@@ -81,6 +83,7 @@ function WatchedBox({
   selectedId,
   handleCloseMovie,
   handleAddWatched,
+  handleDeleteWatched,
 }) {
   const [isOpen2, setIsOpen2] = useState(true);
 
@@ -102,7 +105,10 @@ function WatchedBox({
       ) : (
         <>
           <WatchedSummary watched={watched} />
-          <WatchedMovieList watched={watched} />
+          <WatchedMovieList
+            watched={watched}
+            onDeleteWatched={handleDeleteWatched}
+          />
         </>
       )}
     </div>
@@ -175,7 +181,7 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
               </div>
               <p>
                 <span>⭐️</span>
-                {Math.round(movie.vote_average)} rating 
+                {Math.round(movie.vote_average)} rating
               </p>
             </div>
           </header>
@@ -226,11 +232,11 @@ function WatchedSummary({ watched }) {
         </p>
         <p>
           <span>⭐️</span>
-          <span>{avgImdbRating}</span>
+          <span>{avgImdbRating.toFixed(2)}</span>
         </p>
         <p>
           <span>🌟</span>
-          <span>{avgUserRating}</span>
+          <span>{avgUserRating.toFixed(2)}</span>
         </p>
         <p>
           <span>⏳</span>
@@ -241,17 +247,21 @@ function WatchedSummary({ watched }) {
   );
 }
 
-function WatchedMovieList({ watched }) {
+function WatchedMovieList({ watched, onDeleteWatched }) {
   return (
     <ul className="list">
       {watched.map((movie) => (
-        <WatchedMovie movie={movie} key={movie.id} />
+        <WatchedMovie
+          movie={movie}
+          key={movie.id}
+          onDeleteWatched={onDeleteWatched}
+        />
       ))}
     </ul>
   );
 }
 
-function WatchedMovie({ movie }) {
+function WatchedMovie({ movie, onDeleteWatched }) {
   return (
     <li>
       <img
@@ -272,6 +282,12 @@ function WatchedMovie({ movie }) {
           <span>⏳</span>
           <span>{movie.runtime} min</span>
         </p>
+        <button
+          className="btn-delete"
+          onClick={() => onDeleteWatched(movie.id)}
+        >
+          X
+        </button>
       </div>
     </li>
   );
