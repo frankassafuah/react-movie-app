@@ -97,6 +97,7 @@ function WatchedBox({
           selectedId={selectedId}
           onCloseMovie={handleCloseMovie}
           onAddWatched={handleAddWatched}
+          watched={watched}
         />
       ) : (
         <>
@@ -108,10 +109,15 @@ function WatchedBox({
   );
 }
 
-function MovieDetails({ selectedId, onCloseMovie, onAddWatched }) {
+function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
   const [movie, setMovie] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [userRating, setUserRating] = useState("");
+
+  const isWatched = watched.map((movie) => movie.id).includes(selectedId);
+  const watchedUserRating = watched.find(
+    (movie) => movie.id == selectedId
+  )?.userRating;
 
   function handleAdd() {
     const newWatchedMovie = {
@@ -169,24 +175,30 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched }) {
               </div>
               <p>
                 <span>⭐️</span>
-                {Math.round(movie.vote_average)} rating
+                {Math.round(movie.vote_average)} rating 
               </p>
             </div>
           </header>
           <section>
             <div className="rating">
-              <StarRating
-                maxRating={10}
-                size={24}
-                onSetRating={setUserRating}
-              />
-
-              {userRating > 0 && (
-                <button className="btn-add" onClick={handleAdd}>
-                  + Add to list
-                </button>
+              {!isWatched ? (
+                <>
+                  <StarRating
+                    maxRating={10}
+                    size={24}
+                    onSetRating={setUserRating}
+                  />
+                  {userRating > 0 && (
+                    <button className="btn-add" onClick={handleAdd}>
+                      + Add to list
+                    </button>
+                  )}{" "}
+                </>
+              ) : (
+                <p>You rated this movie {watchedUserRating} ⭐️</p>
               )}
             </div>
+
             <p>
               <em>{movie.overview}</em>
             </p>
