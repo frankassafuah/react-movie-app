@@ -159,6 +159,10 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
     function () {
       if (!movie.title) return;
       document.title = `Movie | ${movie.title}`;
+
+      return function () {
+        document.title = "usePopcorn";
+      };
     },
     [movie.title]
   );
