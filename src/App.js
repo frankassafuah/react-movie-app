@@ -88,6 +88,7 @@ export default function App() {
         }
       }
       if (query.length < 3) return;
+      handleCloseMovie()
       fetchMovie();
 
       return function () {
@@ -96,6 +97,7 @@ export default function App() {
     },
     [query]
   );
+
 
   function handleCloseMovie() {
     setSelectedId(null);
