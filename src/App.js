@@ -51,10 +51,21 @@ const tempWatchedData = [
 ];
 export default function App() {
   const [movies, setMovies] = useState([]);
-  const [watched, setWatched] = useState([]);
+  const [watched, setWatched] = useState(() => JSON.parse(localStorage.getItem('watched')));
   const [isLoading, setIsLoading] = useState(false);
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState(null);
+
+  function handleCloseMovie() {
+    setSelectedId(null);
+  }
+  function handleAddWatched(movie) {
+    setWatched((watched) => [...watched, movie]);
+    // localStorage.setItem("watched", JSON.stringify([...watched, movie]));
+  }
+  function handleDeleteWatched(id) {
+    setWatched((watched) => watched.filter((movie) => movie.id !== id));
+  }
 
   useEffect(function () {
     async function fetchMovies() {
@@ -88,7 +99,7 @@ export default function App() {
         }
       }
       if (query.length < 3) return;
-      handleCloseMovie()
+      handleCloseMovie();
       fetchMovie();
 
       return function () {
@@ -98,16 +109,9 @@ export default function App() {
     [query]
   );
 
-
-  function handleCloseMovie() {
-    setSelectedId(null);
-  }
-  function handleAddWatched(movie) {
-    setWatched((watched) => [...watched, movie]);
-  }
-  function handleDeleteWatched(id) {
-    setWatched((watched) => watched.filter((movie) => movie.id !== id));
-  }
+  useEffect(() => {
+    localStorage.setItem("watched", JSON.stringify(watched));
+  }, [watched]);
 
   return (
     <>
