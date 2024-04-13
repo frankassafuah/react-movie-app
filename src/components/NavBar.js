@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 export default function NavBar({ movies, fetchMovie }) {
   const [query, setQuery] = useState("");
 
   function handleOnChange(value) {
-    console.log(value)
+    console.log(value);
     setQuery(value);
     fetchMovie(value);
   }
@@ -30,8 +30,15 @@ function Logo() {
 }
 
 function Search({ query, setQuery, handleOnChange }) {
+  const inputEl = useRef(null);
+
+  useEffect(() => {
+    inputEl.current.focus();
+  }, []);
+  
   return (
     <input
+      ref={inputEl}
       className="search"
       type="text"
       placeholder="Search movies..."
