@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import NavBar from "./components/NavBar";
 import Main from "./components/Main";
 import Loader from "./components/Loader";
+import { useMovies } from "./components/useMovies";
 
 const tempMovieData = [
   {
@@ -50,9 +51,11 @@ const tempWatchedData = [
   },
 ];
 export default function App() {
-  const [movies, setMovies] = useState([]);
-  const [watched, setWatched] = useState(() => JSON.parse(localStorage.getItem('watched')));
-  const [isLoading, setIsLoading] = useState(false);
+  // const [movies, setMovies] = useState([]);
+  const [watched, setWatched] = useState(() =>
+    JSON.parse(localStorage.getItem("watched"))
+  );
+  // const [isLoading, setIsLoading] = useState(false);
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState(null);
 
@@ -67,47 +70,21 @@ export default function App() {
     setWatched((watched) => watched.filter((movie) => movie.id !== id));
   }
 
-  useEffect(function () {
-    async function fetchMovies() {
-      setIsLoading(true);
-      const res = await fetch(
-        `https://api.themoviedb.org/3/movie/now_playing?api_key=2c03a557e1479b7b37ea2b20a7672f3e&language=en-US&page=1`
-      );
-      const data = await res.json();
-      console.log(data);
-      setMovies(data.results);
-      setIsLoading(false);
-    }
-    fetchMovies();
-  }, []);
+  // useEffect(function () {
+  //   async function fetchMovies() {
+  //     setIsLoading(true);
+  //     const res = await fetch(
+  //       `https://api.themoviedb.org/3/movie/now_playing?api_key=2c03a557e1479b7b37ea2b20a7672f3e&language=en-US&page=1`
+  //     );
+  //     const data = await res.json();
+  //     console.log(data);
+  //     setMovies(data.results);
+  //     setIsLoading(false);
+  //   }
+  //   fetchMovies();
+  // }, []);
 
-  useEffect(
-    function () {
-      const controller = new AbortController();
-      async function fetchMovie() {
-        try {
-          setIsLoading(true);
-          const res = await fetch(
-            `https://api.themoviedb.org/3/search/movie?api_key=37ed43a4f8eaa2abd75f9283692947bc&language=en-US&page=1&query=${query}`,
-            { signal: controller.signal }
-          );
-          const data = await res.json();
-          setMovies(data.results);
-          setIsLoading(false);
-        } catch (error) {
-          console.error(error.message);
-        }
-      }
-      if (query.length < 3) return;
-      handleCloseMovie();
-      fetchMovie();
-
-      return function () {
-        controller.abort();
-      };
-    },
-    [query]
-  );
+  const { movies, isLoading } = useMovies(query, handleCloseMovie);
 
   useEffect(() => {
     localStorage.setItem("watched", JSON.stringify(watched));
